@@ -8,8 +8,16 @@ const CONTACT_NAME = process.env.NEXT_PUBLIC_CONTACT_NAME ?? "Votre référent";
 const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "";
 
 export default function Onboarding() {
-  const [checked, setChecked] = useState<Record<number, boolean>>({});
+  const storageKey = `onboarding-${PRODUCT}-checked`;
+  const [checked, setChecked] = useState<Record<number, boolean>>(() => {
+    if (typeof window === "undefined") return {};
+    try { return JSON.parse(localStorage.getItem(storageKey) ?? "{}"); } catch { return {}; }
+  });
   const [activeStep, setActiveStep] = useState(0);
+
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(checked));
+  }, [checked, storageKey]);
 
   const completedCount = Object.values(checked).filter(Boolean).length;
   const progress = STEPS.length > 0 ? Math.round((completedCount / STEPS.length) * 100) : 0;
